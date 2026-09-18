@@ -1,0 +1,91 @@
+import { Module } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { CATEGORY_REPOSITORY } from './application/repositories/category.repository';
+import { PRODUCT_REPOSITORY } from './application/repositories/product.repository';
+import { STOCK_REPOSITORY } from './application/repositories/stock.repository';
+import { STOCK_MOVEMENT_REPOSITORY } from './application/repositories/stock-movement.repository';
+import { ID_GENERATOR } from './domain/shared/id-generator';
+import { UuidGenerador } from './domain/shared/uuid-generator';
+import { SystemClock } from './domain/shared/system-clock';
+import { CLOCK } from './domain/shared/clock';
+import { CategoryTypeOrmRepository } from './infrastructure/persistence/typeorm/repositories/category-typeorm.repository';
+import { ProductTypeOrmRepository } from './infrastructure/persistence/typeorm/repositories/product-typeorm.repository';
+import { StockTypeOrmRepository } from './infrastructure/persistence/typeorm/repositories/stock-typeorm.repository';
+import { StockMovementTypeOrmRepository } from './infrastructure/persistence/typeorm/repositories/stock-movement-typeorm.repository';
+import { TransactionContextService } from './infrastructure/persistence/typeorm/transaction/transaction-context.service';
+import { TypeOrmTransactionManager } from './infrastructure/persistence/typeorm/transaction/typeorm-transaction-manager';
+import { TypeOrmRepositoryFactory } from './infrastructure/persistence/typeorm/transaction/typeorm-repository-factory';
+import { CategoryOrmEntity } from './infrastructure/persistence/typeorm/entities/category-orm.entity';
+import { ProductOrmEntity } from './infrastructure/persistence/typeorm/entities/product-orm.entity';
+import { StockOrmEntity } from './infrastructure/persistence/typeorm/entities/stock-orm.entity';
+import { StockMovementOrmEntity } from './infrastructure/persistence/typeorm/entities/stock-movement-orm.entity';
+import { CreateCategory } from './application/use-cases/categoria/create-category';
+import { DeactivateCategory } from './application/use-cases/categoria/deactivate-category';
+import { ReactivateCategory } from './application/use-cases/categoria/reactivate-category';
+import { GetCategory } from './application/use-cases/categoria/get-category';
+import { CreateProduct } from './application/use-cases/produto/create-product';
+import { RegisterAcquisition } from './application/use-cases/estoque/register-acquisition';
+import { TRANSACTION_MANAGER } from './application/use-cases/shared/transaction-manager';
+import { CategoryController } from './presentation/controllers/category.controller';
+import { ProductController } from './presentation/controllers/product.controller';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([
+      CategoryOrmEntity,
+      ProductOrmEntity,
+      StockOrmEntity,
+      StockMovementOrmEntity,
+      DataSource,
+    ]),
+  ],
+  controllers: [CategoryController, ProductController],
+  providers: [
+    {
+      provide: CATEGORY_REPOSITORY,
+      useClass: CategoryTypeOrmRepository,
+    },
+    {
+      provide: PRODUCT_REPOSITORY,
+      useClass: ProductTypeOrmRepository,
+    },
+    {
+      provide: STOCK_REPOSITORY,
+      useClass: StockTypeOrmRepository,
+    },
+    {
+      provide: STOCK_MOVEMENT_REPOSITORY,
+      useClass: StockMovementTypeOrmRepository,
+    },
+    {
+      provide: TRANSACTION_MANAGER,
+      useExisting: TypeOrmTransactionManager,
+    },
+    {
+      provide: ID_GENERATOR,
+      useClass: UuidGenerador,
+    },
+    {
+      provide: CLOCK,
+      useClass: SystemClock,
+    },
+    CreateCategory,
+    GetCategory,
+    DeactivateCategory,
+    ReactivateCategory,
+    //CreateCategory,
+    CreateProduct,
+    RegisterAcquisition,
+    TransactionContextService,
+    TypeOrmTransactionManager,
+    TypeOrmRepositoryFactory,
+    /*ProductTypeOrmRepository,
+    StockTypeOrmRepository,
+    StockMovementTypeOrmRepository*/
+  ],
+  exports: [
+    //CATEGORY_REPOSITORY
+  ],
+})
+export class CatalogoModule {}
