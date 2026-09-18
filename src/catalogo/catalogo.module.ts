@@ -5,6 +5,7 @@ import { CATEGORY_REPOSITORY } from './application/repositories/category.reposit
 import { PRODUCT_REPOSITORY } from './application/repositories/product.repository';
 import { STOCK_REPOSITORY } from './application/repositories/stock.repository';
 import { STOCK_MOVEMENT_REPOSITORY } from './application/repositories/stock-movement.repository';
+import { STOCK_MOVEMENT_READER } from './application/repositories/stock-movement-reader';
 import { ID_GENERATOR } from './domain/shared/id-generator';
 import { UuidGenerador } from './domain/shared/uuid-generator';
 import { SystemClock } from './domain/shared/system-clock';
@@ -13,6 +14,7 @@ import { CategoryTypeOrmRepository } from './infrastructure/persistence/typeorm/
 import { ProductTypeOrmRepository } from './infrastructure/persistence/typeorm/repositories/product-typeorm.repository';
 import { StockTypeOrmRepository } from './infrastructure/persistence/typeorm/repositories/stock-typeorm.repository';
 import { StockMovementTypeOrmRepository } from './infrastructure/persistence/typeorm/repositories/stock-movement-typeorm.repository';
+import { StockMovementTypeOrmReader } from './infrastructure/persistence/typeorm/repositories/stock-movement-typeorm-reader';
 import { TransactionContextService } from './infrastructure/persistence/typeorm/transaction/transaction-context.service';
 import { TypeOrmTransactionManager } from './infrastructure/persistence/typeorm/transaction/typeorm-transaction-manager';
 import { TypeOrmRepositoryFactory } from './infrastructure/persistence/typeorm/transaction/typeorm-repository-factory';
@@ -31,6 +33,8 @@ import { ReactivateProduct } from './application/use-cases/produto/reactivate-pr
 import { ListProducts } from './application/use-cases/produto/list-products';
 import { GetStock } from './application/use-cases/estoque/get-stock';
 import { RegisterAcquisition } from './application/use-cases/estoque/register-acquisition';
+import { AdjustStock } from './application/use-cases/estoque/adjust-stock';
+import { ListStockMovements } from './application/use-cases/estoque/list-stock-movements';
 import { TRANSACTION_MANAGER } from './application/use-cases/shared/transaction-manager';
 import { CategoryController } from './presentation/controllers/category.controller';
 import { ProductController } from './presentation/controllers/product.controller';
@@ -64,6 +68,10 @@ import { ProductController } from './presentation/controllers/product.controller
       useClass: StockMovementTypeOrmRepository,
     },
     {
+      provide: STOCK_MOVEMENT_READER,
+      useClass: StockMovementTypeOrmReader,
+    },
+    {
       provide: TRANSACTION_MANAGER,
       useExisting: TypeOrmTransactionManager,
     },
@@ -87,6 +95,8 @@ import { ProductController } from './presentation/controllers/product.controller
     ListProducts,
     GetStock,
     RegisterAcquisition,
+    AdjustStock,
+    ListStockMovements,
     TransactionContextService,
     TypeOrmTransactionManager,
     TypeOrmRepositoryFactory,

@@ -19,3 +19,5 @@ export interface StockMovementReader {
     query: StockMovementQuery,
   ): Promise<StockMovementPage>;
 }
+
+export const STOCK_MOVEMENT_READER = Symbol('STOCK_MOVEMENT_READER');

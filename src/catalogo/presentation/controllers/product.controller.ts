@@ -16,10 +16,14 @@ import { ReactivateProduct } from '../../application/use-cases/produto/reactivat
 import { ListProducts } from '../../application/use-cases/produto/list-products';
 import { GetStock } from '../../application/use-cases/estoque/get-stock';
 import { RegisterAcquisition } from '../../application/use-cases/estoque/register-acquisition';
+import { AdjustStock } from '../../application/use-cases/estoque/adjust-stock';
+import { ListStockMovements } from '../../application/use-cases/estoque/list-stock-movements';
 import { UpdateProductDto } from '../dtos/update-product.dto';
 import { ListProductsQueryDto } from '../dtos/list-products-query.dto';
+import { ListStockMovementsQueryDto } from '../dtos/list-stock-movements-query.dto';
 import { IdParamDto } from '../dtos/id-param.dto';
 import { RegisterAcquisitionDto } from '../dtos/register-acquisition.dto';
+import { AdjustStockDto } from '../dtos/adjust-stock.dto';
 
 @Controller('products')
 export class ProductController {
@@ -31,6 +35,8 @@ export class ProductController {
     private readonly listProducts: ListProducts,
     private readonly getStock: GetStock,
     private readonly registerAcquisition: RegisterAcquisition,
+    private readonly adjustStock: AdjustStock,
+    private readonly listStockMovements: ListStockMovements,
   ) {}
 
   @Post()
@@ -105,6 +111,34 @@ export class ProductController {
       quantity: dto.quantity,
       referenceId: dto.referenceId,
       reason: dto.reason,
+    });
+  }
+
+  @Post(':id/stock/adjustments')
+  async adjusttStock(
+    @Param() params: IdParamDto,
+    @Body() dto: AdjustStockDto,
+  ): Promise<void> {
+    await this.adjustStock.execute({
+      produtoId: params.id,
+      quantidadeReal: dto.quantidadeReal,
+      motivo: dto.motivo,
+    });
+  }
+
+  @Get(':id/stock/movements')
+  async listtStockMovements(
+    @Param() params: IdParamDto,
+    @Query() query: ListStockMovementsQueryDto,
+  ) {
+    return this.listStockMovements.execute({
+      productId: params.id,
+      page: query.page,
+      limit: query.limit,
+      tipo: query.tipo,
+      origem: query.origem,
+      from: query.from ? new Date(query.from) : undefined,
+      to: query.to ? new Date(query.to) : undefined,
     });
   }
 }
