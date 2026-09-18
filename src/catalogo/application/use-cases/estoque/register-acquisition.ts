@@ -1,4 +1,4 @@
-import { Injectable, Inject } from "@nestjs/common";
+import { Injectable, Inject } from '@nestjs/common';
 import type { StockRepository } from '../../repositories/stock.repository';
 import { STOCK_REPOSITORY } from '../../repositories/stock.repository';
 import { StockMovementRepository } from '../../repositories/stock-movement.repository';
@@ -25,14 +25,16 @@ export class RegisterAcquisition {
   ) {}
 
   async execute(input: RegisterAcquisitionInput): Promise<void> {
+    this.validate(input);
+    /*
     if (!Number.isInteger(input.quantity) || input.quantity <= 0) {
       //throw new InvalidStockQuantityError(input.quantity);
       throw new Error('Quantidade de estoque inválida');
-    }
+    }*/
 
     await this.transactionManager.run(async () => {
-      const estoque = await this.stockRepository.findByProductId(
-        input.productId,
+      const estoque = await this.stockRepository.findByProductIdsForUpdate(
+        [input.productId],
       );
 
       if (!estoque) {
@@ -40,7 +42,7 @@ export class RegisterAcquisition {
         throw new Error('Estoque não encontrado');
       }
 
-      estoque.entrar({
+      estoque[0].entrar({
         id: this.idGenerator.generate(),
         quantidade: input.quantity,
         origem: StockMovementOrigin.AQUISICAO,
@@ -49,10 +51,110 @@ export class RegisterAcquisition {
         createdAt: this.clock.now(),
       });
 
-      await this.stockRepository.save(estoque);
+      await this.stockRepository.save(estoque[0]);
     });
+    
+  }
+
+  private validate(input: RegisterAcquisitionInput): void {
+    if (!input.productId?.trim()) {
+      throw new Error('O ID do produto é obrigatório');
+    }
+
+    if (!Number.isInteger(input.quantity) || input.quantity <= 0) {
+      throw new Error('A quantidade deve ser um inteiro maior que zero');
+    }
+
+    if (
+      input.reason !== undefined &&
+      input.reason !== null &&
+      input.reason.trim().length > 500
+    ) {
+      throw new Error('O motivo não pode exceder 500 caracteres');
+    }
   }
 }
+
+/*
+export class RegisterAcquisition {
+  constructor(
+    private readonly stockRepository:
+      StockRepository,
+
+    private readonly idGenerator:
+      IdGenerator,
+
+    private readonly clock:
+      Clock,
+
+    private readonly transactionManager:
+      TransactionManager,
+  ) {}
+
+  async execute(
+    input: RegisterAcquisitionInput,
+  ): Promise<void> {
+    this.validate(input);
+
+    const stock =
+      await this.stockRepository.findByProductId(
+        input.productId,
+      );
+
+    if (!stock) {
+      throw new Error(
+        'Estoque do produto não encontrado',
+      );
+    }
+
+    await this.transactionManager.run(
+      async () => {
+        stock.entrar({
+          id: this.idGenerator.generate(),
+          quantidade: input.quantity,
+          origem: StockMovementOrigin.AQUISICAO,
+          referenciaId:
+            input.referenceId ?? null,
+          motivo:
+            input.reason?.trim() || null,
+          createdAt: this.clock.now(),
+        });
+
+        await this.stockRepository.save(stock);
+      },
+    );
+  }
+
+  private validate(
+    input: RegisterAcquisitionInput,
+  ): void {
+    if (!input.productId?.trim()) {
+      throw new Error(
+        'O ID do produto é obrigatório',
+      );
+    }
+
+    if (
+      !Number.isInteger(input.quantity) ||
+      input.quantity <= 0
+    ) {
+      throw new Error(
+        'A quantidade deve ser um inteiro maior que zero',
+      );
+    }
+
+    if (
+      input.reason !== undefined &&
+      input.reason !== null &&
+      input.reason.trim().length > 500
+    ) {
+      throw new Error(
+        'O motivo não pode exceder 500 caracteres',
+      );
+    }
+  }
+}
+*/
 
 /*
 export class RegisterAcquisition {

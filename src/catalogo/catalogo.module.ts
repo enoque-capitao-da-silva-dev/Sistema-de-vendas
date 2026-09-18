@@ -25,6 +25,11 @@ import { DeactivateCategory } from './application/use-cases/categoria/deactivate
 import { ReactivateCategory } from './application/use-cases/categoria/reactivate-category';
 import { GetCategory } from './application/use-cases/categoria/get-category';
 import { CreateProduct } from './application/use-cases/produto/create-product';
+import { UpdateProduct } from './application/use-cases/produto/update-product';
+import { DeactivateProduct } from './application/use-cases/produto/deactivate-product';
+import { ReactivateProduct } from './application/use-cases/produto/reactivate-product';
+import { ListProducts } from './application/use-cases/produto/list-products';
+import { GetStock } from './application/use-cases/estoque/get-stock';
 import { RegisterAcquisition } from './application/use-cases/estoque/register-acquisition';
 import { TRANSACTION_MANAGER } from './application/use-cases/shared/transaction-manager';
 import { CategoryController } from './presentation/controllers/category.controller';
@@ -76,6 +81,11 @@ import { ProductController } from './presentation/controllers/product.controller
     ReactivateCategory,
     //CreateCategory,
     CreateProduct,
+    UpdateProduct,
+    DeactivateProduct,
+    ReactivateProduct,
+    ListProducts,
+    GetStock,
     RegisterAcquisition,
     TransactionContextService,
     TypeOrmTransactionManager,

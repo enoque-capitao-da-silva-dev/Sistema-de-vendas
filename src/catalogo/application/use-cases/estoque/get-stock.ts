@@ -21,8 +21,7 @@ export class GetStock {
 
     return {
       produtoId: estoque.getProdutoId(),
-      quantidadeDisponivel:
-        estoque.getQuantidadeDisponivel(),
+      quantidadeDisponivel: estoque.getQuantidadeDisponivel(),
     };
   }
 }

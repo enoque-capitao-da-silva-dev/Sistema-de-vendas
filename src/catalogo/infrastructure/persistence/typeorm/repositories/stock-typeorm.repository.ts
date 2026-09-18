@@ -85,7 +85,7 @@ export class StockTypeOrmRepository implements StockRepository {
       .setLock('pessimistic_write')
       .getMany();
 
-    return entities.map(StockMapper.toDomain);
+    return entities.map((entity) => StockMapper.toDomain(entity));
   }
 
 }

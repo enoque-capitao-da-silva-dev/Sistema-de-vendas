@@ -16,7 +16,7 @@ import { GetCategory } from '../../application/use-cases/categoria/get-category'
 
 //import { CreateCategoryDto } from './dto/create-category.dto';
 
-import { CategoryIdParamDto } from '../dtos/category-id-param.dto';
+import { IdParamDto } from '../dtos/id-param.dto';
 
 @Controller('categories')
 export class CategoryController {
@@ -43,21 +43,21 @@ export class CategoryController {
   }
 
   @Get(':id')
-  async findById(@Param() params: CategoryIdParamDto) {
+  async findById(@Param() params: IdParamDto) {
     return this.getCategory.execute({
       id: params.id,
     });
   }
 
   @Patch(':id/deactivate')
-  async deactivate(@Param() params: CategoryIdParamDto): Promise<void> {
+  async deactivate(@Param() params: IdParamDto): Promise<void> {
     await this.deactivateCategory.execute({
       id: params.id,
     });
   }
 
   @Patch(':id/reactivate')
-  async reactivate(@Param() params: CategoryIdParamDto): Promise<void> {
+  async reactivate(@Param() params: IdParamDto): Promise<void> {
     await this.reactivateCategory.execute({
       id: params.id,
     });
