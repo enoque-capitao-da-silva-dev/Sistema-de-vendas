@@ -68,4 +68,25 @@ export class StockMovementTypeOrmReader implements StockMovementReader {
       totalPages: Math.ceil(total / query.limit)
     };
   }
+
+  async findBySaleId(saleId: string): Promise<StockMovementPage> {
+    const repository = this.getRepository();
+
+    const qb = repository
+      .createQueryBuilder('movement')
+      .where('movement.referenciaId = :saleId', { saleId })
+      .andWhere('movement.origem = :origem', {
+        origem: 'VENDA'
+      });
+
+    const [entities, total] = await qb.getManyAndCount();
+
+    return {
+      items: entities.map(entity => StockMovementMapper.toDomain(entity)),
+      page: 1,
+      limit: 1,
+      total,
+      totalPages: 1
+    };
+  }
 }

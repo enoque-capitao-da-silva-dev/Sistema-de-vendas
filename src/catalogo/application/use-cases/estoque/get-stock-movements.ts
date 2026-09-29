@@ -3,7 +3,7 @@ import { StockMovementReader } from '../../repositories/stock-movement-reader';
 import { GetStockMovementsInput } from '../../inputs/get-stock-movements.input';
 import { StockMovementPage } from '../../outputs/stock-movement-page';
 
-export class GetStockMovements {
+/*export class GetStockMovements {
   constructor(
     private readonly stockRepository: StockRepository,
     private readonly movementReader: StockMovementReader,
@@ -21,4 +21,4 @@ export class GetStockMovements {
       limit: input.limit,
     });
   }
-}
+}*/

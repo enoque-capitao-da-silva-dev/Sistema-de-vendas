@@ -8,6 +8,8 @@ export interface StockRepository {
   findByProductIds(produtoId: string[]): Promise<Estoque[] | null>;
 
   findByProductIdsForUpdate(productIds: string[]): Promise<Estoque[]>;
+
+  saveMany(stocks: Estoque[]): Promise<void>;
   /*
   findByName(nome: string): Promise<Categoria | null>;
   

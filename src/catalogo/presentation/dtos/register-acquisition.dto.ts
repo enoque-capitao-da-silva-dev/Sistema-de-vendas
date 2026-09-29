@@ -7,21 +7,23 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class RegisterAcquisitionDto {
-  @IsUUID()
-  productId: string;
+  //@IsUUID()
+  //productId: string;
 
+  @Type(() => Number)
   @IsInt()
   @Min(1)
-  quantity: number;
+  quantidade: number;
 
   @IsOptional()
   @IsUUID()
-  referenceId?: string | null;
+  referenciaId?: string | null;
 
   @IsOptional()
   @IsString()
   @MaxLength(500)
-  reason?: string | null;
+  motivo?: string | null;
 }

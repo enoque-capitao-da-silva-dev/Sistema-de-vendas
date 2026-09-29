@@ -1,5 +1,6 @@
 import { Money } from '../shared/money';
 import { ProductStatus } from '../enums/product-status.enum';
+import { MyCustomError } from "../../errors/my-custom.error";
 
 export class Produto {
   private constructor(
@@ -25,11 +26,11 @@ export class Produto {
     preco: Money,
   ): Produto {
     if (!nome.trim()) {
-      throw new Error('O nome do produto é obrigatório');
+      throw new MyCustomError('O nome do produto é obrigatório');
     }
 
     if (!categoriaId) {
-      throw new Error('O produto deve possuir uma categoria');
+      throw new MyCustomError('O produto deve possuir uma categoria');
     }
 
     return new Produto(
@@ -72,7 +73,7 @@ export class Produto {
 
   alterarDados(nome: string, descricao: string | null, preco: Money): void {
     if (!nome.trim()) {
-      throw new Error('O nome do produto é obrigatório');
+      throw new MyCustomError('O nome do produto é obrigatório');
     }
 
     this.nome = nome.trim();
@@ -84,7 +85,7 @@ export class Produto {
 
   alterarCategoria(categoriaId: string): void {
     if (!categoriaId) {
-      throw new Error('Categoria inválida');
+      throw new MyCustomError('Categoria inválida');
     }
 
     this.categoriaId = categoriaId;
@@ -93,7 +94,7 @@ export class Produto {
 
   desativar(): void {
     if (this.status === ProductStatus.DESATIVADO) {
-      throw new Error('O produto já está desativado');
+      throw new MyCustomError('O produto já está desativado');
     }
 
     this.status = ProductStatus.DESATIVADO;
@@ -102,7 +103,7 @@ export class Produto {
 
   reativar(): void {
     if (this.status === ProductStatus.ATIVO) {
-      throw new Error('O produto já está ativo');
+      throw new MyCustomError('O produto já está ativo');
     }
 
     this.status = ProductStatus.ATIVO;

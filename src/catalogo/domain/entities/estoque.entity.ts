@@ -2,6 +2,7 @@ import { MovimentacaoEstoque } from './movimentacao-estoque.entity';
 import { StockMovementOrigin } from '../enums/stock-movement-origin.enum';
 import { StockMovementType } from '../enums/stock-movement-type.enum';
 import { StockMovementData } from '../shared/stock-movement-data';
+import { MyCustomError } from '../../errors/my-custom.error';
 
 export class Estoque {
   private readonly pendingMovements: MovimentacaoEstoque[] = [];
@@ -16,7 +17,7 @@ export class Estoque {
 
   static create(id: string, produtoId: string, quantidadeInicial = 0): Estoque {
     if (quantidadeInicial < 0) {
-      throw new Error('O estoque inicial não pode ser negativo');
+      throw new MyCustomError('O estoque inicial não pode ser negativo');
     }
 
     return new Estoque(
@@ -43,34 +44,6 @@ export class Estoque {
       params.updatedAt,
     );
   }
-
-  /*
-  entrar(
-    quantidade: number,
-    origem: StockMovementOrigin,
-    referenciaId: string | null = null,
-    motivo: string | null = null,
-  ): MovimentacaoEstoque {
-    this.validarQuantidade(quantidade);
-
-    const anterior = this.quantidadeDisponivel;
-
-    this.quantidadeDisponivel += quantidade;
-
-    this.touch();
-
-    return MovimentacaoEstoque.create({
-      id: crypto.randomUUID(),
-      estoqueId: this.id,
-      tipo: StockMovementType.ENTRADA,
-      origem,
-      quantidade,
-      quantidadeAnterior: anterior,
-      quantidadePosterior: this.quantidadeDisponivel,
-      referenciaId,
-      motivo,
-    });
-  }*/
 
   entrar(data: StockMovementData): void {
     this.validateMovementQuantity(data.quantidade);
@@ -99,49 +72,13 @@ export class Estoque {
     this.pendingMovements.push(movimento);
   }
 
-  /*
-  sair(
-    quantidade: number,
-    origem: StockMovementOrigin,
-    referenciaId: string | null = null,
-  ): MovimentacaoEstoque {
-    this.validarQuantidade(quantidade);
-
-    if (quantidade > this.quantidadeDisponivel) {
-      throw new Error('Estoque insuficiente');
-    }
-
-    const anterior = this.quantidadeDisponivel;
-
-    this.quantidadeDisponivel -= quantidade;
-
-    this.touch();
-
-    return MovimentacaoEstoque.create({
-      id: crypto.randomUUID(),
-      estoqueId: this.id,
-      tipo: StockMovementType.SAIDA,
-      origem,
-      quantidade,
-      quantidadeAnterior: anterior,
-      quantidadePosterior: this.quantidadeDisponivel,
-      referenciaId,
-      motivo: null,
-    });
-  }*/
-
   sair(data: StockMovementData): void {
     this.validateMovementQuantity(data.quantidade);
 
     const quantidadeAnterior = this.quantidadeDisponivel;
 
     if (data.quantidade > quantidadeAnterior) {
-      /*throw new InsufficientStockError(
-        this.produtoId,
-        data.quantidade,
-        quantidadeAnterior,
-      );*/
-      throw new Error('Estoque insuficiente');
+      throw new MyCustomError('Estoque insuficiente');
     }
 
     const quantidadePosterior = quantidadeAnterior - data.quantidade;
@@ -168,76 +105,17 @@ export class Estoque {
 
   private validateMovementQuantity(quantidade: number): void {
     if (!Number.isInteger(quantidade) || quantidade <= 0) {
-      //throw new InvalidStockQuantityError(quantidade);
-      throw new Error('Quantidade de estoque invalido');
+      throw new MyCustomError('Quantidade de estoque invalido');
     }
-  }
-
-  
-  ajustar(
-    quantidadeReal: number,
-    motivo: string,
-    referenciaId: string | null,
-  ): MovimentacaoEstoque | null {
-    if (!Number.isInteger(quantidadeReal)) {
-      throw new Error('A quantidade real deve ser um número inteiro');
-    }
-
-    if (quantidadeReal < 0) {
-      throw new Error('A quantidade real não pode ser negativa');
-    }
-
-    if (!motivo.trim()) {
-      throw new Error('O motivo do ajuste é obrigatório');
-    }
-
-    const quantidadeAnterior = this.quantidadeDisponivel;
-
-    if (quantidadeReal === quantidadeAnterior) {
-      return null;
-    }
-
-    const diferenca = quantidadeReal - quantidadeAnterior;
-
-    if (diferenca > 0) {
-      this.quantidadeDisponivel = quantidadeReal;
-
-      return MovimentacaoEstoque.create({
-        id: crypto.randomUUID(),
-        estoqueId: this.id,
-        tipo: StockMovementType.ENTRADA,
-        origem: StockMovementOrigin.AJUSTE,
-        quantidade: diferenca,
-        quantidadeAnterior,
-        quantidadePosterior: quantidadeReal,
-        referenciaId,
-        motivo,
-      });
-    }
-
-    const quantidadeSaida = Math.abs(diferenca);
-
-    this.quantidadeDisponivel = quantidadeReal;
-    return MovimentacaoEstoque.create({
-      id: crypto.randomUUID(),
-      estoqueId: this.id,
-      tipo: StockMovementType.SAIDA,
-      origem: StockMovementOrigin.AJUSTE,
-      quantidade: quantidadeSaida,
-      quantidadeAnterior,
-      quantidadePosterior: quantidadeReal,
-      referenciaId,
-      motivo,
-    });
   }
 
   private validarQuantidade(quantidade: number): void {
     if (!Number.isInteger(quantidade)) {
-      throw new Error('A quantidade deve ser um número inteiro');
+      throw new MyCustomError('A quantidade deve ser um número inteiro');
     }
 
     if (quantidade <= 0) {
-      throw new Error('A quantidade deve ser maior que zero');
+      throw new MyCustomError('A quantidade deve ser maior que zero');
     }
   }
 

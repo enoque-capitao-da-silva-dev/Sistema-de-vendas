@@ -17,12 +17,6 @@ export class StockMovementTypeOrmRepository implements StockMovementRepository {
   ) {}
 
   private getRepository(): Repository<StockMovementOrmEntity> {
-    /*const context = this.contextStorage.get();
-
-    if (context) {
-      return context.manager.getRepository(StockMovementOrmEntity);
-    }*/
-
     return this.repositoryFactory.getRepository(StockMovementOrmEntity);
   }
 
@@ -77,7 +71,6 @@ export class StockMovementTypeOrmRepository implements StockMovementRepository {
       
     return {
       items: entities.map(entity => StockMovementMapper.toDomain(entity)),
-      //items: [],
       page: query.page,
       limit: query.limit,
       total,

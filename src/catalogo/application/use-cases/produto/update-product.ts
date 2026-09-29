@@ -1,12 +1,18 @@
-import { ProductRepository } from "../../repositories/product.repository";
-import { CategoryRepository } from "../../repositories/category.repository";
+import { Injectable, Inject } from "@nestjs/common";
+import type { ProductRepository } from "../../repositories/product.repository";
+import { PRODUCT_REPOSITORY } from "../../repositories/product.repository";
+import type { CategoryRepository } from "../../repositories/category.repository";
+import { CATEGORY_REPOSITORY } from "../../repositories/category.repository";
 import { UpdateProductInput } from "../../inputs/update-product.input";
 import { Money } from "../../../domain/shared/money";
+import { MyCustomError } from "../../../errors/my-custom.error";
 
-
+@Injectable()
 export class UpdateProduct {
   constructor(
+    @Inject(PRODUCT_REPOSITORY)
     private readonly productRepository: ProductRepository,
+    @Inject(CATEGORY_REPOSITORY)
     private readonly categoryRepository: CategoryRepository,
   ) {}
 
@@ -16,7 +22,7 @@ export class UpdateProduct {
     );
 
     if (!produto) {
-      throw new Error('Produto não encontrado');
+      throw new MyCustomError('Produto não encontrado');
     }
 
     const categoria = await this.categoryRepository.findById(
@@ -24,23 +30,23 @@ export class UpdateProduct {
     );
 
     if (!categoria) {
-      throw new Error('Categoria não encontrada');
+      throw new MyCustomError('Categoria não encontrada');
     }
 
     if (!categoria.estaAtiva()) {
-      throw new Error(
+      throw new MyCustomError(
         'Não é possível associar o produto a uma categoria desativada',
       );
     }
 
     const nomeJaExiste =
-      await this.productRepository.existsByName(
+      await this.productRepository.findByName(
         input.nome,
-        input.produtoId,
+        //input.produtoId,
       );
 
-    if (nomeJaExiste) {
-      throw new Error('Já existe outro produto com este nome');
+    if (nomeJaExiste && nomeJaExiste.getId() !== input.produtoId) {
+      throw new MyCustomError('Já existe outro produto com este nome');
     }
 
     const preco = Money.create(input.preco, 'AOA');

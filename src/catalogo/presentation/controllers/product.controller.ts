@@ -18,12 +18,15 @@ import { GetStock } from '../../application/use-cases/estoque/get-stock';
 import { RegisterAcquisition } from '../../application/use-cases/estoque/register-acquisition';
 import { AdjustStock } from '../../application/use-cases/estoque/adjust-stock';
 import { ListStockMovements } from '../../application/use-cases/estoque/list-stock-movements';
+import { DecreaseStockForSale } from '../../application/use-cases/estoque/decrease-stock-for-sale';
+import { RestoreStockFromSaleCancellation } from '../../application/use-cases/estoque/restore-stock-from-sale-cancellation';
 import { UpdateProductDto } from '../dtos/update-product.dto';
 import { ListProductsQueryDto } from '../dtos/list-products-query.dto';
 import { ListStockMovementsQueryDto } from '../dtos/list-stock-movements-query.dto';
 import { IdParamDto } from '../dtos/id-param.dto';
 import { RegisterAcquisitionDto } from '../dtos/register-acquisition.dto';
 import { AdjustStockDto } from '../dtos/adjust-stock.dto';
+import { DecreaseStockForSaleDto } from '../dtos/decrease-stock-for-sale.dto';
 
 @Controller('products')
 export class ProductController {
@@ -37,6 +40,8 @@ export class ProductController {
     private readonly registerAcquisition: RegisterAcquisition,
     private readonly adjustStock: AdjustStock,
     private readonly listStockMovements: ListStockMovements,
+    private readonly decreaseStockForSale: DecreaseStockForSale,
+    private readonly restoreStockFromSaleCancellation: RestoreStockFromSaleCancellation,
   ) {}
 
   @Post()
@@ -51,7 +56,8 @@ export class ProductController {
     });
 
     return {
-      id: productId,
+      status: 'success',
+      message: 'Produto criado com sucesso'
     };
   }
 
@@ -59,7 +65,7 @@ export class ProductController {
   async update(
     @Param() params: IdParamDto,
     @Body() dto: UpdateProductDto,
-  ): Promise<void> {
+  ) {
     await this.updateProduct.execute({
       produtoId: params.id,
       categoriaId: dto.categoriaId,
@@ -67,20 +73,35 @@ export class ProductController {
       descricao: dto.descricao,
       preco: dto.preco,
     });
+
+    return {
+      status: 'success',
+      message: 'Produto atualizado com sucesso',
+    }
   }
 
   @Patch(':id/deactivate')
-  async deactivate(@Param() params: IdParamDto): Promise<void> {
+  async deactivate(@Param() params: IdParamDto) {
     await this.deactivateProduct.execute({
       produtoId: params.id,
     });
+
+    return {
+      status: 'success',
+      message: 'Produto desativado com sucesso'
+    }
   }
 
   @Patch(':id/reactivate')
-  async reactivate(@Param() params: IdParamDto): Promise<void> {
+  async reactivate(@Param() params: IdParamDto) {
     await this.reactivateProduct.execute({
       produtoId: params.id,
     });
+
+    return {
+      status: 'success',
+      message: 'Produto reativado com sucesso'
+    }
   }
 
   @Get()
@@ -105,25 +126,41 @@ export class ProductController {
   async registerrAcquisition(
     @Param() params: IdParamDto,
     @Body() dto: RegisterAcquisitionDto,
-  ): Promise<void> {
+  ) {
     await this.registerAcquisition.execute({
       productId: params.id,
-      quantity: dto.quantity,
-      referenceId: dto.referenceId,
-      reason: dto.reason,
+      quantity: dto.quantidade,
+      referenceId: dto.referenciaId ?? null,
+      reason: dto.motivo ?? null,
     });
+
+    return {
+      status: 'success',
+      message: 'Aquisição concluida com sucesso',
+      data: {
+        produtoId: params.id,
+      }
+    }
   }
 
   @Post(':id/stock/adjustments')
   async adjusttStock(
     @Param() params: IdParamDto,
     @Body() dto: AdjustStockDto,
-  ): Promise<void> {
+  ) {
     await this.adjustStock.execute({
       produtoId: params.id,
       quantidadeReal: dto.quantidadeReal,
       motivo: dto.motivo,
     });
+
+    return {
+      status: 'success',
+      message: 'Ajuste de estoque concluodo com sucesso',
+      data: {
+        produtoId: params.id
+      }
+    }
   }
 
   @Get(':id/stock/movements')
@@ -141,27 +178,36 @@ export class ProductController {
       to: query.to ? new Date(query.to) : undefined,
     });
   }
-}
 
-/*
-@Controller('products')
-export class ProductController {
-  constructor(
-    private readonly createProduct: CreateProduct,
-  ) {}
-
-  @Post()
-  async create(
-    @Body() dto: CreateProductDto,
+  @Post(':id/stock/decrease-stock-for-sale')
+  async decreaseStockForSales(
+    @Param() params: IdParamDto,
+    @Body() dto: DecreaseStockForSaleDto
   ) {
-    return this.createProduct.execute({
-      categoriaId: dto.categoriaId,
-      nome: dto.nome,
-      descricao: dto.descricao,
-      preco: dto.preco,
-      currency: dto.currency,
-      estoqueInicial: dto.estoqueInicial
+    await this.decreaseStockForSale.execute({
+      saleId: params.id,
+      items: dto.items
     });
+
+    return {
+      status: 'success',
+      message: 'Baixa da venda realizada com sucesso'
+    }
+  }
+  
+  @Post(':id/stock/decrease-stock-from-sale-cancellation')
+  async restoreStockFromSaleCancellations(
+    @Param() params: IdParamDto,
+    @Body() dto: DecreaseStockForSaleDto
+  ) {
+    await this.restoreStockFromSaleCancellation.execute({
+      saleId: params.id,
+      items: dto.items
+    });
+
+    return {
+      status: 'success',
+      message: 'Estoques restaurados com sucesso'
+    }
   }
 }
-*/

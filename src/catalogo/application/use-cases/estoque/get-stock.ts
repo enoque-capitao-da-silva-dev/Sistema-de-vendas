@@ -1,9 +1,14 @@
-import { StockRepository } from "../../repositories/stock.repository";
+import { Injectable, Inject } from "@nestjs/common";
+import type { StockRepository } from "../../repositories/stock.repository";
+import { STOCK_REPOSITORY } from "../../repositories/stock.repository";
 import { GetStockInput } from "../../inputs/get-stock.input";
 import { GetStockOutput } from "../../outputs/get-stock.output";
+import { MyCustomError } from "../../../errors/my-custom.error";
 
+@Injectable()
 export class GetStock {
   constructor(
+    @Inject(STOCK_REPOSITORY)
     private readonly stockRepository: StockRepository,
   ) {}
 
@@ -16,7 +21,7 @@ export class GetStock {
       );
 
     if (!estoque) {
-      throw new Error('Estoque não encontrado');
+      throw new MyCustomError('Estoque não encontrado');
     }
 
     return {

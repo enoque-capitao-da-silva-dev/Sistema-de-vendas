@@ -1,11 +1,16 @@
+import { Injectable, Inject } from "@nestjs/common";
 import { ProductStatus } from '../../../domain/enums/product-status.enum';
 import { ListProductsInput } from '../../inputs/list-products.input';
 import { ProductPage } from '../../outputs/product-page';
 import { ProductQuery } from '../../inputs/product-query';
-import { ProductRepository } from '../../repositories/product.repository';
+import type { ProductRepository } from '../../repositories/product.repository';
+import { PRODUCT_REPOSITORY } from '../../repositories/product.repository';
+import { MyCustomError } from '../../../errors/my-custom.error';
 
+@Injectable()
 export class ListProducts {
   constructor(
+    @Inject(PRODUCT_REPOSITORY)
     private readonly productRepository: ProductRepository
   ) {}
 
@@ -25,11 +30,11 @@ export class ListProducts {
 
   private validate(input: ListProductsInput): void {
     if (!Number.isInteger(input.page) || input.page < 1) {
-      throw new Error('A página deve ser um inteiro maior que zero');
+      throw new MyCustomError('A página deve ser um inteiro maior que zero');
     }
 
     if (!Number.isInteger(input.limit) || input.limit < 1) {
-      throw new Error('O limite deve ser um inteiro maior que zero');
+      throw new MyCustomError('O limite deve ser um inteiro maior que zero');
     }
   }
 }

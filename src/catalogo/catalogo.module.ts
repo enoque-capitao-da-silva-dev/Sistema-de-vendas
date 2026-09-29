@@ -6,6 +6,10 @@ import { PRODUCT_REPOSITORY } from './application/repositories/product.repositor
 import { STOCK_REPOSITORY } from './application/repositories/stock.repository';
 import { STOCK_MOVEMENT_REPOSITORY } from './application/repositories/stock-movement.repository';
 import { STOCK_MOVEMENT_READER } from './application/repositories/stock-movement-reader';
+import { CATALOGO_SALES_GATEWAY } from './application/ports/catalogo-sales-gateway';
+import { CatalogoSalesGatewayImpl } from './application/ports/catalogo-sales-gateway-impl';
+import { CATALOGO_PRODUCT_READER } from './application/ports/catalogo-product-reader';
+import { CatalogoProductReaderImpl } from './application/ports/catalogo-product-reader-impl';
 import { ID_GENERATOR } from './domain/shared/id-generator';
 import { UuidGenerador } from './domain/shared/uuid-generator';
 import { SystemClock } from './domain/shared/system-clock';
@@ -23,9 +27,11 @@ import { ProductOrmEntity } from './infrastructure/persistence/typeorm/entities/
 import { StockOrmEntity } from './infrastructure/persistence/typeorm/entities/stock-orm.entity';
 import { StockMovementOrmEntity } from './infrastructure/persistence/typeorm/entities/stock-movement-orm.entity';
 import { CreateCategory } from './application/use-cases/categoria/create-category';
+import { UpdateCategory } from './application/use-cases/categoria/update-category';
 import { DeactivateCategory } from './application/use-cases/categoria/deactivate-category';
 import { ReactivateCategory } from './application/use-cases/categoria/reactivate-category';
 import { GetCategory } from './application/use-cases/categoria/get-category';
+import { ListCategories } from './application/use-cases/categoria/list-categories';
 import { CreateProduct } from './application/use-cases/produto/create-product';
 import { UpdateProduct } from './application/use-cases/produto/update-product';
 import { DeactivateProduct } from './application/use-cases/produto/deactivate-product';
@@ -35,6 +41,8 @@ import { GetStock } from './application/use-cases/estoque/get-stock';
 import { RegisterAcquisition } from './application/use-cases/estoque/register-acquisition';
 import { AdjustStock } from './application/use-cases/estoque/adjust-stock';
 import { ListStockMovements } from './application/use-cases/estoque/list-stock-movements';
+import { DecreaseStockForSale } from './application/use-cases/estoque/decrease-stock-for-sale';
+import { RestoreStockFromSaleCancellation } from './application/use-cases/estoque/restore-stock-from-sale-cancellation';
 import { TRANSACTION_MANAGER } from './application/use-cases/shared/transaction-manager';
 import { CategoryController } from './presentation/controllers/category.controller';
 import { ProductController } from './presentation/controllers/product.controller';
@@ -72,6 +80,14 @@ import { ProductController } from './presentation/controllers/product.controller
       useClass: StockMovementTypeOrmReader,
     },
     {
+      provide: CATALOGO_SALES_GATEWAY,
+      useClass: CatalogoSalesGatewayImpl,
+    },
+    {
+      provide: CATALOGO_PRODUCT_READER,
+      useClass: CatalogoProductReaderImpl,
+    },
+    {
       provide: TRANSACTION_MANAGER,
       useExisting: TypeOrmTransactionManager,
     },
@@ -84,9 +100,11 @@ import { ProductController } from './presentation/controllers/product.controller
       useClass: SystemClock,
     },
     CreateCategory,
+    UpdateCategory,
     GetCategory,
     DeactivateCategory,
     ReactivateCategory,
+    ListCategories,
     //CreateCategory,
     CreateProduct,
     UpdateProduct,
@@ -97,6 +115,8 @@ import { ProductController } from './presentation/controllers/product.controller
     RegisterAcquisition,
     AdjustStock,
     ListStockMovements,
+    DecreaseStockForSale,
+    RestoreStockFromSaleCancellation,
     TransactionContextService,
     TypeOrmTransactionManager,
     TypeOrmRepositoryFactory,
@@ -105,7 +125,12 @@ import { ProductController } from './presentation/controllers/product.controller
     StockMovementTypeOrmRepository*/
   ],
   exports: [
-    //CATEGORY_REPOSITORY
+    TRANSACTION_MANAGER,
+    CATALOGO_SALES_GATEWAY,
+    CATALOGO_PRODUCT_READER,
+    ID_GENERATOR,
+    CLOCK,
+    TypeOrmRepositoryFactory
   ],
 })
 export class CatalogoModule {}

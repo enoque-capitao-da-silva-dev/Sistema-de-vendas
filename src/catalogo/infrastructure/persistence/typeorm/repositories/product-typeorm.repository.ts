@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { ProductOrmEntity } from '../entities/product-orm.entity';
@@ -16,8 +17,6 @@ export class ProductTypeOrmRepository implements ProductRepository {
   constructor(
     @InjectRepository(ProductOrmEntity)
     private readonly repository: Repository<ProductOrmEntity>,
-    //private readonly dataSource: DataSource,
-    //private readonly transactionContext: TransactionContextService,
     private readonly repositoryFactory: TypeOrmRepositoryFactory,
   ) {}
 
@@ -51,19 +50,13 @@ export class ProductTypeOrmRepository implements ProductRepository {
     return ProductMapper.toDomain(entity);
   }
 
-  /*async findAll(status: ProductStatus): Promise<Produto[]> {
-    const entities = await this.repository.findBy({ status });
-
-    return entities.map((entity) => ProductMapper.toDomain(entity));
-  }*/
-
   async findAll(query: ProductQuery): Promise<ProductPage> {
     const repository = this.getRepository();
 
     const qb = repository.createQueryBuilder('product');
 
     if (query.nome) {
-      qb.andWhere('product.nome ILIKE :nome', {
+      qb.andWhere('product.nome LIKE :nome', {
         nome: `%${query.nome}%`,
       });
     }
@@ -91,7 +84,7 @@ export class ProductTypeOrmRepository implements ProductRepository {
     const [entities, total] = await qb.getManyAndCount();
 
     return {
-      items: entities.map(entity => ProductMapper.toDomain(entity)),
+      items: entities.map((entity) => ProductMapper.toDomain(entity)),
       page: query.page,
       limit: query.limit,
       total,
@@ -104,15 +97,24 @@ export class ProductTypeOrmRepository implements ProductRepository {
     });
   }
 
-  private getRepository(): Repository<ProductOrmEntity> {
-    /*const manager = this.transactionContext.getManager();
-
-    if (manager) {
-      return manager.getRepository(ProductOrmEntity);
+  async findSellableByIds(productIds: string[]): Promise<Produto[]> {
+    if (productIds.length === 0) {
+      return [];
     }
 
-    return this.dataSource.getRepository(ProductOrmEntity);
-    */
+    const repository = this.getRepository();
+
+    const entities = await repository.find({
+      where: {
+        id: In(productIds),
+        status: ProductStatus.ATIVO,
+      },
+    });
+
+    return entities.map(entity => ProductMapper.toDomain(entity));
+  }
+
+  private getRepository(): Repository<ProductOrmEntity> {
     return this.repositoryFactory.getRepository(ProductOrmEntity);
   }
 }

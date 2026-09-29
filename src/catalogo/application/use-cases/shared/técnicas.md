@@ -57,7 +57,7 @@ const preco = Money.create(
 
 ---
 
-Transação
+TRANSAÇÃO
 
 Uma transação é um conjunto de operações na base de dados 
 tratados como uma única unidade de trabalho.  
@@ -317,3 +317,66 @@ adotando uma ordem determinística de aquisição dos locks.
 Para uma garantia mais forte de ordem de processamento, 
 a query precisa expressar essa ordenação de maneira apropriada, 
 ou a estratégia pode ser estruturada para adquirir os locks em sequência.
+
+
+---
+
+BULK SQL 
+
+Bulk SQL significa basicamente:
+Enviar ao banco uma operação que processa vários registros de uma vez, 
+em vez de executar uma operação SQL separada para cada registro.
+
+Bulk SQL não significa necessariamente uma única query. 
+Significa principalmente: processar vários registros por operação, 
+reduzindo o overhead de operações individuais.
+
+Bulk SQL otimiza a persistência
+
+Exemplo:
+UPDATE stock
+SET quantity_available =
+  quantity_available -
+  CASE product_id
+    WHEN 'A' THEN 2
+    WHEN 'B' THEN 5
+    WHEN 'C' THEN 1
+  END
+WHERE product_id IN ('A', 'B', 'C');
+
+Exemplo 
+INSERT INTO stock_movements
+    (id, stock_id, quantity, origin, reference_id)
+VALUES
+    ('m1', 'A', 2, 'VENDA', 'SALE-1'),
+    ('m2', 'B', 5, 'VENDA', 'SALE-1'),
+    ('m3', 'C', 1, 'VENDA', 'SALE-1');
+
+Com isso, você reduz a quantidade de comunicação entre aplicação e banco.
+Esse custo é chamado frequentemente de round trip.
+
+---
+
+PLACEHOLDER ?
+
+O ? é um placeholder posicional, em que os valores são associados aos ? pela 
+ordem em que aparecem no SQL, da esquerda para a direita 
+
+Exemplo:
+
+await manager.query(
+  `
+    UPDATE stock
+    SET quantity_available = ?
+    WHERE id = ?
+  `,
+  [8, 'A'],
+);
+
+O primeiro valor 8, vai para o primeiro ?
+O segundo valor 'A' vai para o segui ?
+
+É equivalente conceitualmente a:
+UPDATE stock
+SET quantity_available = 8
+WHERE id = 'A';

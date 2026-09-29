@@ -7,9 +7,8 @@ import {
   Max,
   Min,
 } from 'class-validator';
-
-import { ProductStatus } from
-  '../../domain/enums/product-status.enum';
+import { Type } from 'class-transformer';
+import { ProductStatus } from '../../domain/enums/product-status.enum';
 
 export class ListProductsQueryDto {
   @IsOptional()
@@ -24,11 +23,13 @@ export class ListProductsQueryDto {
   @IsEnum(ProductStatus)
   status?: ProductStatus;
 
+  @Type(() => Number)
   @IsOptional()
   @IsInt()
   @Min(1)
   page: number = 1;
 
+  @Type(() => Number)
   @IsOptional()
   @IsInt()
   @Min(1)

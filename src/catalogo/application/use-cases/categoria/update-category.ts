@@ -1,11 +1,15 @@
-import { CategoryRepository } from "../../repositories/category.repository";
+import { Injectable, Inject} from "@nestjs/common";
+import type { CategoryRepository } from "../../repositories/category.repository";
+import { CATEGORY_REPOSITORY } from "../../repositories/category.repository";
 import { UpdateCategoryInput } from "../../inputs/update-category.input";
 import { CreateCategoryOutput } from "../../outputs/create-category.output";
 import { CategoryNotFoundError } from "../../errors/category-not-found.error";
 import { CategoryAlreadyExistsError } from "../../errors/category-already-exists.error";
 
+@Injectable()
 export class UpdateCategory {
   constructor(
+    @Inject(CATEGORY_REPOSITORY)
     private readonly categoryRepository: CategoryRepository,
   ) {}
 
@@ -16,7 +20,6 @@ export class UpdateCategory {
       await this.categoryRepository.findById(input.id);
 
     if (!categoria) {
-      //throw new Error('Categoria não encontrada');
       throw new CategoryNotFoundError();
     }
 
@@ -29,15 +32,12 @@ export class UpdateCategory {
       nomeExiste &&
       categoria.getNome() !== input.nome.trim()
     ) {
-      /*throw new Error(
-        'Já existe uma categoria com esse nome',
-      );*/
       throw new CategoryAlreadyExistsError();
     }
 
     categoria.alterarDados(
       input.nome,
-      input.descricao ?? null,
+      input.descricao ?? categoria.getDescricao(),
     );
 
     await this.categoryRepository.save(categoria);

@@ -1,5 +1,6 @@
 import { StockMovementOrigin } from '../enums/stock-movement-origin.enum';
 import { StockMovementType } from '../enums/stock-movement-type.enum';
+import { MyCustomError } from '../../errors/my-custom.error';
 
 export class MovimentacaoEstoque {
   private constructor(
@@ -27,15 +28,15 @@ export class MovimentacaoEstoque {
     motivo?: string | null;
   }): MovimentacaoEstoque {
     if (params.quantidade <= 0) {
-      throw new Error('A quantidade movimentada deve ser menor que zero');
+      throw new MyCustomError('A quantidade movimentada deve ser menor que zero');
     }
 
     if (params.quantidadeAnterior < 0) {
-      throw new Error('A quantidade anterior não pode ser negativa');
+      throw new MyCustomError('A quantidade anterior não pode ser negativa');
     }
 
     if (params.quantidadePosterior < 0) {
-      throw new Error('A quantidade posterior não pode ser negativa');
+      throw new MyCustomError('A quantidade posterior não pode ser negativa');
     }
 
     return new MovimentacaoEstoque(

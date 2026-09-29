@@ -27,9 +27,6 @@ export class CreateCategory {
       await this.categoryRepository.existsByName(nome);
 
     if (exists) {
-      /*throw new Error(
-        'Já existe uma categoria com esse nome',
-      );*/
       throw new CategoryAlreadyExistsError();
     }
 

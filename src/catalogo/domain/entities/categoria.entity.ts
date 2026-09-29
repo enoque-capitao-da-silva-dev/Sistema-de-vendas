@@ -1,4 +1,5 @@
 import { CategoryStatus } from '../enums/category-status.enum';
+import { MyCustomError } from '../../errors/my-custom.error';
 
 export class Categoria {
   private constructor(
@@ -16,7 +17,7 @@ export class Categoria {
     descricao: string | null = null,
   ): Categoria {
     if (!nome.trim()) {
-      throw new Error('O nome da categoria é obrigatório');
+      throw new MyCustomError('O nome da categoria é obrigatório');
     }
 
     return new Categoria(
@@ -50,7 +51,7 @@ export class Categoria {
 
   desativar(): void {
     if (this.status === CategoryStatus.DESATIVADA) {
-      throw new Error('A categoria já está desativada');
+      throw new MyCustomError('A categoria já está desativada');
     }
 
     this.status = CategoryStatus.DESATIVADA;
@@ -59,7 +60,7 @@ export class Categoria {
 
   reativar(): void {
     if (this.status === CategoryStatus.ATIVA) {
-      throw new Error('A categoria já está ativa');
+      throw new MyCustomError('A categoria já está ativa');
     }
 
     this.status = CategoryStatus.ATIVA;
@@ -71,7 +72,7 @@ export class Categoria {
     descricao: string | null,
   ): void {
     if (!nome.trim()) {
-      throw new Error('O nome da categoria é obrigatório');
+      throw new MyCustomError('O nome da categoria é obrigatório');
     }
 
     this.nome = nome.trim();

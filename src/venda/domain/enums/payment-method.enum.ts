@@ -1,0 +1,5 @@
+export enum PaymentMethod {
+  DINHEIRO = 'DINHEIRO',
+  MULTICAIXA_EXPRESS = 'MULTICAIXA_EXPRESS',
+  CARTAO = 'CARTAO',
+}

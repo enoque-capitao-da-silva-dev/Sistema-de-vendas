@@ -7,7 +7,6 @@ import { TransactionContextService } from './transaction-context.service';
 @Injectable()
 export class TypeOrmTransactionManager implements TransactionManager {
   constructor(
- //   @InjectRepository(DataSource)
     private readonly dataSource: DataSource,
     private readonly transactionContext: TransactionContextService,
   ) {}

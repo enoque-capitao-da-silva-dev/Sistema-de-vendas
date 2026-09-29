@@ -1,8 +1,13 @@
-import { ProductRepository } from "../../repositories/product.repository";
+import { Injectable, Inject } from "@nestjs/common";
+import { PRODUCT_REPOSITORY } from "../../repositories/product.repository";
+import type { ProductRepository } from "../../repositories/product.repository";
 import { DeactivateProductInput } from "../../inputs/deactivate-product.input";
+import { MyCustomError } from "../../../errors/my-custom.error";
 
+@Injectable()
 export class DeactivateProduct {
   constructor(
+    @Inject(PRODUCT_REPOSITORY)
     private readonly productRepository: ProductRepository,
   ) {}
 
@@ -14,7 +19,7 @@ export class DeactivateProduct {
     );
 
     if (!produto) {
-      throw new Error('Produto não encontrado');
+      throw new MyCustomError('Produto não encontrado');
     }
 
     produto.desativar();

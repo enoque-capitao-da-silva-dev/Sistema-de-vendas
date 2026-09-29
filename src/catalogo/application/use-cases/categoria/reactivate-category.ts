@@ -17,7 +17,6 @@ export class ReactivateCategory {
       await this.categoryRepository.findById(input.id);
 
     if (!categoria) {
-      //throw new Error('Categoria não encontrada');
       throw new CategoryNotFoundError();
     }
 

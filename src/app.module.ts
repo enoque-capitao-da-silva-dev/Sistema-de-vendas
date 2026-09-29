@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { CatalogoModule } from './catalogo/catalogo.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 //import { TasksService } from "cron-job";
+import { VendaModule } from './venda/venda.module';
 
 @Module({
   imports: [
@@ -15,10 +16,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       password: '',
       database: 'sistema_vendas',
       autoLoadEntities: true,
-      synchronize: true,
+      //synchronize: true,
+      //logging: ['query', 'error'],
     }),
     
-    CatalogoModule
+    CatalogoModule,
+    
+    VendaModule
   ],
   controllers: [AppController],
   providers: [

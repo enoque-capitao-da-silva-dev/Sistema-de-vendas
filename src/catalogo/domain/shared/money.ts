@@ -1,3 +1,5 @@
+import { MyCustomError } from '../../errors/my-custom.error';
+
 export class Money {
   private constructor(
     private readonly amount: number,
@@ -6,11 +8,11 @@ export class Money {
 
   static create(amount: number, currency = 'AOA'): Money {
     if (!Number.isFinite(amount)) {
-      throw new Error('Valor monetário inválido');
+      throw new MyCustomError('Valor monetário inválido');
     }
 
     if (amount <= 0) {
-      throw new Error('O valor monetário deve ser maior que zero');
+      throw new MyCustomError('O valor monetário deve ser maior que zero');
     }
 
     return new Money(amount, currency);

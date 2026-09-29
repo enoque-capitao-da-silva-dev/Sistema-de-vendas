@@ -1,11 +1,17 @@
-import { ProductRepository } from "../../repositories/product.repository";
-import { CategoryRepository } from "../../repositories/category.repository";
+import { Injectable, Inject } from "@nestjs/common";
+import { PRODUCT_REPOSITORY } from "../../repositories/product.repository";
+import type { ProductRepository } from "../../repositories/product.repository";
+import { CATEGORY_REPOSITORY } from "../../repositories/category.repository";
+import type { CategoryRepository } from "../../repositories/category.repository";
 import { ReactivateProductInput } from "../../inputs/reactivate-product.input";
+import { MyCustomError } from "../../../errors/my-custom.error";
 
-
+@Injectable()
 export class ReactivateProduct {
   constructor(
+    @Inject(PRODUCT_REPOSITORY)
     private readonly productRepository: ProductRepository,
+    @Inject(CATEGORY_REPOSITORY)
     private readonly categoryRepository: CategoryRepository,
   ) {}
 
@@ -17,7 +23,7 @@ export class ReactivateProduct {
     );
 
     if (!produto) {
-      throw new Error('Produto não encontrado');
+      throw new MyCustomError('Produto não encontrado');
     }
 
     const categoria = await this.categoryRepository.findById(
@@ -25,11 +31,11 @@ export class ReactivateProduct {
     );
 
     if (!categoria) {
-      throw new Error('Categoria não encontrada');
+      throw new MyCustomError('Categoria não encontrada');
     }
 
     if (!categoria.estaAtiva()) {
-      throw new Error(
+      throw new MyCustomError(
         'Não é possível reativar um produto de uma categoria desativada',
       );
     }

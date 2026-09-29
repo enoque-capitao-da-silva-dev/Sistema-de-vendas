@@ -1,4 +1,3 @@
-//import { DataSource } from 'typeorm';
 import { Injectable, Inject } from '@nestjs/common';
 import type { CategoryRepository } from '../../repositories/category.repository';
 import { CATEGORY_REPOSITORY } from '../../repositories/category.repository';
@@ -18,21 +17,17 @@ import { MovimentacaoEstoque } from '../../../domain/entities/movimentacao-estoq
 import { StockMovementOrigin } from '../../../domain/enums/stock-movement-origin.enum';
 import type { TransactionManager } from '../shared/transaction-manager';
 import { TRANSACTION_MANAGER } from '../shared/transaction-manager';
-//import { TransactionContextService } from '../../../infrastructure/persistence/typeorm/transaction/transaction-context.service';
+import { MyCustomError } from "../../../errors/my-custom.error";
 
 @Injectable()
 export class CreateProduct {
   constructor(
     @Inject(CATEGORY_REPOSITORY)
     private readonly categoryRepository: CategoryRepository,
-    //private readonly dataSource: DataSource,
-    //private readonly transactionContext: TransactionContextService,
     @Inject(PRODUCT_REPOSITORY)
     private readonly productRepository: ProductRepository,
     @Inject(STOCK_REPOSITORY)
     private readonly stockRepository: StockRepository,
-    //@Inject(STOCK_MOVEMENT_REPOSITORY)
-    //private readonly stockMovementRepository: StockMovementRepository,
     @Inject(ID_GENERATOR)
     private readonly idGenerator: IdGenerator,
     @Inject(TRANSACTION_MANAGER)
@@ -43,17 +38,17 @@ export class CreateProduct {
     const categoria = await this.categoryRepository.findById(input.categoriaId);
 
     if (!categoria) {
-      throw new Error('Categoria não encontrada');
+      throw new MyCustomError('Categoria não encontrada');
     }
 
     if (!categoria.estaAtiva()) {
-      throw new Error('A categoria está desativada');
+      throw new MyCustomError('A categoria está desativada');
     }
 
     const exists = await this.productRepository.existsByName(input.nome.trim());
 
     if (exists) {
-      throw new Error('Já existe um produto com esse nome');
+      throw new MyCustomError('Já existe um produto com esse nome');
     }
 
     const preco = Money.create(input.preco, 'AOA');
@@ -71,14 +66,7 @@ export class CreateProduct {
       produto.getId(),
     );
 
-    //let movimentacao: MovimentacaoEstoque | null = null;
-
     if (input.estoqueInicial > 0) {
-      /*movimentacao = estoque.entrar(
-        input.estoqueInicial,
-        StockMovementOrigin.ESTOQUE_INICIAL,
-      );*/
-
       estoque.entrar({
         id: this.idGenerator.generate(),
         quantidade: input.estoqueInicial,
@@ -93,36 +81,7 @@ export class CreateProduct {
       await this.productRepository.save(produto);
 
       await this.stockRepository.save(estoque);
-
-      /*if (movimentacao) {
-        await this.stockMovementRepository.save(movimentacao);
-      }*/
-
-      throw new Error('Damn!!');
     });
 
-    /*await this.productRepository.save(
-      produto,
-    );
-
-    await this.stockRepository.save(
-      estoque,
-    );
-
-    if (movimentacao) {
-      await this.stockMovementRepository.save(
-        movimentacao,
-      );
-    }*/
   }
-/*
-  private getRepository(): Repository<CategoryOrmEntity> {
-    const manager = this.transactionContext.getManager();
-
-    if (manager) {
-      return manager.getRepository(CategoryOrmEntity);
-    }
-
-    return this.dataSource.getRepository(CategoryOrmEntity);
-  }*/
 }

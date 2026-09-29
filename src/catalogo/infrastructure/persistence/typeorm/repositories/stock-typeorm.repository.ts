@@ -45,6 +45,92 @@ export class StockTypeOrmRepository implements StockRepository {
     await movementRepository.save(movementEntities);
   }
 
+  async saveMany(stocks: Estoque[]): Promise<void> {
+    if (stocks.length === 0) {
+      return;
+    }
+
+    const repository = this.getRepository();
+
+    const ids = stocks.map((stock) => stock.getId());
+
+    const caseParts: string[] = [];
+    const parameters: unknown[] = [];
+
+    for (const stock of stocks) {
+      caseParts.push(`WHEN ? THEN ?`);
+
+      parameters.push(stock.getId(), stock.getQuantidadeDisponivel());
+    }
+
+    const placeholders = ids.map(() => '?').join(', ');
+
+    parameters.push(...ids);
+
+    await repository.query(
+      `
+      UPDATE stocks
+      SET quantity_available =
+        CASE id
+          ${caseParts.join('\n')}
+        END
+      WHERE id IN (${placeholders})
+    `,
+      parameters,
+    );
+
+    /*
+     * 2. Inserir movimentos
+     */
+
+    const movementPlaceholders: string[] = [];
+    const movementParameters: unknown[] = [];
+
+    for (const stock of stocks) {
+      for (const movement of stock.getPendingMovements()) {
+        movementPlaceholders.push('(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+
+        movementParameters.push(
+          movement.getId(),
+          stock.getId(),
+          movement.getQuantidade(),
+          movement.getQuantidadeAnterior(),
+          movement.getQuantidadePosterior(),
+          movement.getTipo(),
+          movement.getOrigem(),
+          movement.getReferenciaId(),
+          movement.getMotivo(),
+          movement.getCreatedAt(),
+        );
+      }
+    }
+
+    if (movementPlaceholders.length === 0) {
+      return;
+    }
+
+    await repository.query(
+      `
+        INSERT INTO stock_movements
+        (
+          id,
+          stock_id,
+          quantidade,
+          quantity_before,
+          quantity_after,
+          tipo,
+          origem,
+          reference_id,
+          motivo,
+          createdAt
+        )
+        VALUES
+        ${movementPlaceholders.join(',\n')}
+      `,
+      movementParameters,
+    );
+  }
+
   async findByProductId(produtoId: string): Promise<Estoque | null> {
     const entity = await this.getRepository().findOne({
       where: { produtoId },
@@ -82,10 +168,10 @@ export class StockTypeOrmRepository implements StockRepository {
     const entities = await repository
       .createQueryBuilder('stock')
       .where('stock.produtoId IN (:...productIds)', { productIds })
+      .orderBy('stock.id', 'ASC')
       .setLock('pessimistic_write')
       .getMany();
 
     return entities.map((entity) => StockMapper.toDomain(entity));
   }
-
 }
